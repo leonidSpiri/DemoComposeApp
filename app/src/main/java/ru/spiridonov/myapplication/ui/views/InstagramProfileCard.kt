@@ -1,4 +1,4 @@
-package ru.spiridonov.myapplication.ui.theme
+package ru.spiridonov.myapplication.ui.views
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -13,23 +13,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ru.spiridonov.myapplication.ui.theme.ApplicationTheme
 
-@Preview
+
 @Composable
 fun InstagramProfileCard() {
     Card(
+        modifier = Modifier
+            .padding(8.dp),
         shape = RoundedCornerShape(
             topStart = 4.dp,
             topEnd = 4.dp
         ),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color.Black)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)
     ) {
 
         Row(
@@ -70,5 +74,25 @@ private fun TwoBoxes() {
                 .background(color = Color.Red)
         )
 
+    }
+}
+
+@Preview
+@Composable
+fun previewCardLight() {
+    ApplicationTheme(
+        darkTheme = false
+    ) {
+        InstagramProfileCard()
+    }
+}
+
+@Preview
+@Composable
+fun previewCardDark() {
+    ApplicationTheme(
+        darkTheme = true
+    ) {
+        InstagramProfileCard()
     }
 }

@@ -1,4 +1,4 @@
-package ru.spiridonov.myapplication.ui.theme
+package ru.spiridonov.myapplication.ui.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
