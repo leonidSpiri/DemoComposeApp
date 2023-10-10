@@ -6,10 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ru.spiridonov.myapplication.ui.theme.ApplicationTheme
-import ru.spiridonov.myapplication.ui.views.InstagramProfileCard
+import ru.spiridonov.myapplication.ui.views.PostCard
 
 
 class MainActivity : ComponentActivity() {
@@ -19,10 +21,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             ApplicationTheme {
                 Box(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
+                        .padding(8.dp)
                 ) {
-                    InstagramProfileCard()
+                    PostCard()
                 }
 
             }
