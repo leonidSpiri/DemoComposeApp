@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Compose App</string>
     <string name="template_text">Donec vitae nunc tortor. Interdum.</string>
+    <string name="navigation_item_home">Home</string>
+    <string name="navigation_item_favorite">Favorite</string>
+    <string name="navigation_item_profile">Profile</string>
 </resources>

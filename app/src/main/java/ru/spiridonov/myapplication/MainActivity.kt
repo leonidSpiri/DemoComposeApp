@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.spiridonov.myapplication.ui.theme.ApplicationTheme
+import ru.spiridonov.myapplication.ui.views.MainScreen
 import ru.spiridonov.myapplication.ui.views.PostCard
 
 
@@ -24,9 +25,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
-                        .padding(8.dp)
                 ) {
-                    PostCard()
+                    MainScreen()
                 }
 
             }
