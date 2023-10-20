@@ -15,10 +15,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import ru.spiridonov.myapplication.domain.FeedPost
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+    val feedPost = remember {
+        mutableStateOf(FeedPost())
+    }
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -55,7 +60,22 @@ fun MainScreen() {
             modifier = Modifier
                 .padding(it)
         ) {
-            PostCard()
+            PostCard(
+                modifier = Modifier
+                    .padding(4.dp),
+                feedPost = feedPost.value,
+                onStatisticsItemClickListener = { newItem ->
+                    val oldStatisticItem = feedPost.value.statisticsList
+                    val newStatistics = oldStatisticItem.toMutableList().apply {
+                        replaceAll { oldItem ->
+                            if (oldItem.type == newItem.type)
+                                oldItem.copy(count = oldItem.count + 1)
+                            else oldItem
+                        }
+                    }
+                    feedPost.value = feedPost.value.copy(statisticsList = newStatistics)
+                }
+            )
         }
     }
 }

@@ -1,7 +1,7 @@
 package ru.spiridonov.myapplication.ui.views
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,40 +24,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.spiridonov.myapplication.R
-import ru.spiridonov.myapplication.ui.theme.ApplicationTheme
+import ru.spiridonov.myapplication.domain.FeedPost
+import ru.spiridonov.myapplication.domain.StatisticItem
+import ru.spiridonov.myapplication.domain.StatisticType
 
 @Composable
-fun PostCard() {
-    Card {
+fun PostCard(
+    modifier: Modifier = Modifier,
+    feedPost: FeedPost,
+    onStatisticsItemClickListener: (StatisticItem) -> Unit
+) {
+    Card(
+        modifier = modifier
+    ) {
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primary)
                 .padding(8.dp)
         ) {
-            PostHeader()
+            PostHeader(feedPost)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = stringResource(R.string.template_text))
+            Text(text = feedPost.contentText)
             Spacer(modifier = Modifier.height(8.dp))
             Image(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp),
                 painter = painterResource(
-                    id = R.drawable.post_content_image
+                    id = feedPost.contentImageResId
                 ),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Statistics()
+            Statistics(statisticsList = feedPost.statisticsList,
+                onItemClickListener = onStatisticsItemClickListener)
         }
     }
 }
 
 @Composable
-private fun PostHeader() {
+private fun PostHeader(feedPost: FeedPost) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -66,7 +74,7 @@ private fun PostHeader() {
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape),
-            painter = painterResource(id = R.drawable.post_comunity_thumbnail),
+            painter = painterResource(id = feedPost.avatarResId),
             contentDescription = null
         )
 
@@ -76,14 +84,14 @@ private fun PostHeader() {
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = "/dev/null",
+                text = feedPost.communityName,
                 color = MaterialTheme.colorScheme.onPrimary
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "13:49",
+                text = feedPost.publicationDate,
                 color = MaterialTheme.colorScheme.onSecondary
             )
         }
@@ -98,28 +106,46 @@ private fun PostHeader() {
 
 
 @Composable
-private fun Statistics() {
+private fun Statistics(
+    statisticsList: List<StatisticItem>,
+    onItemClickListener: (StatisticItem) -> Unit
+) {
     Row {
         Row(
             modifier = Modifier.weight(1f)
         ) {
-            IconWithText(iconResId = R.drawable.ic_views_count, text = "999")
+            val viewsItem = statisticsList.getItemByType(StatisticType.VIEWS)
+            IconWithText(
+                iconResId = R.drawable.ic_views_count,
+                text = viewsItem.count.toString(),
+                onItemClickListener = { onItemClickListener(viewsItem) })
         }
 
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconWithText(iconResId = R.drawable.ic_share, text = "1")
-            IconWithText(iconResId = R.drawable.ic_comment, text = "22")
-            IconWithText(iconResId = R.drawable.ic_like, text = "333")
+            val sharesItem = statisticsList.getItemByType(StatisticType.SHARES)
+            IconWithText(iconResId = R.drawable.ic_share, text = sharesItem.count.toString(),
+                onItemClickListener = { onItemClickListener(sharesItem) })
+            val commentItem = statisticsList.getItemByType(StatisticType.COMMENTS)
+            IconWithText(iconResId = R.drawable.ic_comment, text = commentItem.count.toString(),
+                onItemClickListener = { onItemClickListener(commentItem) })
+            val likeItem = statisticsList.getItemByType(StatisticType.LIKES)
+            IconWithText(iconResId = R.drawable.ic_like, text = likeItem.count.toString(),
+                onItemClickListener = { onItemClickListener(likeItem) })
         }
     }
 }
 
 @Composable
-private fun IconWithText(iconResId: Int, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun IconWithText(iconResId: Int, text: String, onItemClickListener: () -> Unit) {
+    Row(
+        modifier = Modifier.clickable {
+            onItemClickListener()
+        },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             painter = painterResource(id = iconResId),
             contentDescription = null,
@@ -135,18 +161,5 @@ private fun IconWithText(iconResId: Int, text: String) {
     }
 }
 
-@Preview
-@Composable
-private fun PreviewLight() {
-    ApplicationTheme(darkTheme = false) {
-        PostCard()
-    }
-}
-
-@Preview
-@Composable
-private fun PreviewNight() {
-    ApplicationTheme(darkTheme = true) {
-        PostCard()
-    }
-}
+private fun List<StatisticItem>.getItemByType(type: StatisticType) =
+    this.find { it.type == type } ?: throw IllegalStateException("type $this was not found")
