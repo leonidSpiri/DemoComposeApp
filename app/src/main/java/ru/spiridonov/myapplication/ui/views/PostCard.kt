@@ -34,7 +34,10 @@ import ru.spiridonov.myapplication.domain.StatisticType
 fun PostCard(
     modifier: Modifier = Modifier,
     feedPost: FeedPost,
-    onStatisticsItemClickListener: (StatisticItem) -> Unit
+    onLikeClickListener: (StatisticItem) -> Unit,
+    onShareClickListener: (StatisticItem) -> Unit,
+    onViewsClickListener: (StatisticItem) -> Unit,
+    onCommentClickListener: (StatisticItem) -> Unit
 ) {
     Card(
         modifier = modifier
@@ -58,8 +61,13 @@ fun PostCard(
                 contentScale = ContentScale.FillWidth
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Statistics(statisticsList = feedPost.statisticsList,
-                onItemClickListener = onStatisticsItemClickListener)
+            Statistics(
+                statisticsList = feedPost.statisticsList,
+                onLikeClickListener = onLikeClickListener,
+                onShareClickListener = onShareClickListener,
+                onViewsClickListener = onViewsClickListener,
+                onCommentClickListener = onCommentClickListener
+            )
         }
     }
 }
@@ -108,7 +116,10 @@ private fun PostHeader(feedPost: FeedPost) {
 @Composable
 private fun Statistics(
     statisticsList: List<StatisticItem>,
-    onItemClickListener: (StatisticItem) -> Unit
+    onLikeClickListener: (StatisticItem) -> Unit,
+    onShareClickListener: (StatisticItem) -> Unit,
+    onViewsClickListener: (StatisticItem) -> Unit,
+    onCommentClickListener: (StatisticItem) -> Unit
 ) {
     Row {
         Row(
@@ -118,7 +129,7 @@ private fun Statistics(
             IconWithText(
                 iconResId = R.drawable.ic_views_count,
                 text = viewsItem.count.toString(),
-                onItemClickListener = { onItemClickListener(viewsItem) })
+                onItemClickListener = { onViewsClickListener(viewsItem) })
         }
 
         Row(
@@ -127,13 +138,13 @@ private fun Statistics(
         ) {
             val sharesItem = statisticsList.getItemByType(StatisticType.SHARES)
             IconWithText(iconResId = R.drawable.ic_share, text = sharesItem.count.toString(),
-                onItemClickListener = { onItemClickListener(sharesItem) })
+                onItemClickListener = { onShareClickListener(sharesItem) })
             val commentItem = statisticsList.getItemByType(StatisticType.COMMENTS)
             IconWithText(iconResId = R.drawable.ic_comment, text = commentItem.count.toString(),
-                onItemClickListener = { onItemClickListener(commentItem) })
+                onItemClickListener = { onCommentClickListener(commentItem) })
             val likeItem = statisticsList.getItemByType(StatisticType.LIKES)
             IconWithText(iconResId = R.drawable.ic_like, text = likeItem.count.toString(),
-                onItemClickListener = { onItemClickListener(likeItem) })
+                onItemClickListener = { onLikeClickListener(likeItem) })
         }
     }
 }
