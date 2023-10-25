@@ -3,6 +3,7 @@ package ru.spiridonov.myapplication.domain
 import ru.spiridonov.myapplication.R
 
 data class FeedPost(
+    val id: Int = 0,
     val communityName: String = "/dev/null",
     val publicationDate: String = "14:54",
     val avatarResId: Int = R.drawable.post_comunity_thumbnail,
