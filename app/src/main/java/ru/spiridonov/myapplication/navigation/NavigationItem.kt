@@ -1,4 +1,4 @@
-package ru.spiridonov.myapplication.ui.views
+package ru.spiridonov.myapplication.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
@@ -8,19 +8,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import ru.spiridonov.myapplication.R
 
 sealed class NavigationItem(
+    val screen: Screen,
     val titleResId: Int,
     val icon: ImageVector
 ) {
-    object Home : NavigationItem(
+    data object Home : NavigationItem(
         titleResId = R.string.navigation_item_home,
-        icon = Icons.Outlined.Home
+        icon = Icons.Outlined.Home,
+        screen = Screen.NewsFeed
     )
-    object Favorite : NavigationItem(
+
+    data object Favorite : NavigationItem(
         titleResId = R.string.navigation_item_favorite,
-        icon = Icons.Outlined.Favorite
+        icon = Icons.Outlined.Favorite,
+        screen = Screen.Favorite
     )
-    object Profile : NavigationItem(
+
+    data object Profile : NavigationItem(
         titleResId = R.string.navigation_item_profile,
-        icon = Icons.Outlined.Person
+        icon = Icons.Outlined.Person,
+        screen = Screen.Profile
     )
 }
