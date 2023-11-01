@@ -1,4 +1,4 @@
-package ru.spiridonov.myapplication.ui.views
+package ru.spiridonov.myapplication.ui.supporting_views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

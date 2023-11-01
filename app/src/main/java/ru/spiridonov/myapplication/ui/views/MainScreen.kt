@@ -1,5 +1,6 @@
 package ru.spiridonov.myapplication.ui.views
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -9,22 +10,30 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.currentBackStackEntryAsState
+import ru.spiridonov.myapplication.domain.FeedPost
 import ru.spiridonov.myapplication.navigation.AppNavGraph
 import ru.spiridonov.myapplication.navigation.NavigationItem
 import ru.spiridonov.myapplication.navigation.rememberNavigationState
-import ru.spiridonov.myapplication.ui.MainViewModel
+import ru.spiridonov.myapplication.ui.views.comments.CommentsScreen
+import ru.spiridonov.myapplication.ui.views.news_feed.NewsFeedScreen
 
 @Composable
-fun MainScreen(viewModel: MainViewModel) {
+fun MainScreen() {
     val navigationState = rememberNavigationState()
+    val commentsToPost: MutableState<FeedPost?> = remember {
+        mutableStateOf(null)
+    }
 
     Scaffold(
         bottomBar = {
@@ -61,10 +70,22 @@ fun MainScreen(viewModel: MainViewModel) {
         AppNavGraph(
             navHostController = navigationState.navHostController,
             homeScreenContent = {
-                HomeScreen(
-                    viewModel = viewModel,
-                    paddingValues = paddingValues
-                )
+                if (commentsToPost.value != null) {
+                    CommentsScreen(
+                        onBackPressed = {
+                            commentsToPost.value = null
+                        })
+                    BackHandler {
+                        commentsToPost.value = null
+                    }
+
+                } else
+                    NewsFeedScreen(
+                        paddingValues = paddingValues,
+                        onCommentClickListener = {
+                            commentsToPost.value = it
+                        }
+                    )
             },
             favouriteScreenContent = { TextCounter(name = "Favourite") },
             profileScreenContent = { TextCounter(name = "Profile") }
