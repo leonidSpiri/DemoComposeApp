@@ -6,15 +6,17 @@ import androidx.lifecycle.ViewModel
 import ru.spiridonov.myapplication.domain.FeedPost
 import ru.spiridonov.myapplication.domain.PostComment
 
-class CommentsViewModel : ViewModel() {
+class CommentsViewModel(
+    feedPost: FeedPost
+) : ViewModel() {
     private val _screenState = MutableLiveData<CommentsScreenState>(CommentsScreenState.Initial)
     val screenState: LiveData<CommentsScreenState> = _screenState
 
     init {
-        loadComments(FeedPost())
+        loadComments(feedPost)
     }
 
-    fun loadComments(feedPost: FeedPost) {
+    private fun loadComments(feedPost: FeedPost) {
         val commentsList = mutableListOf<PostComment>().apply {
             repeat(10) {
                 add(
