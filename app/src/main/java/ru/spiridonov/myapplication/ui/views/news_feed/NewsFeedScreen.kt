@@ -6,13 +6,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SwipeToDismiss
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.spiridonov.myapplication.domain.FeedPost
@@ -44,7 +46,7 @@ fun NewsFeedScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun FeedPosts(
     posts: List<FeedPost>,
@@ -64,31 +66,47 @@ private fun FeedPosts(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items = posts, key = { it.id }) { feedPost ->
-            val dismissState = rememberDismissState()
-            if (dismissState.isDismissed(DismissDirection.EndToStart)) viewModel.remove(feedPost)
+            val dismissThresholds = with(receiver = LocalDensity.current) {
+                LocalConfiguration.current.screenWidthDp.dp.toPx() * 0.5F
+            }
+            val dismissState = rememberSwipeToDismissBoxState(
+                positionalThreshold = { dismissThresholds },
+                confirmValueChange = { value ->
+                    val isDismissed = value in setOf(
 
-            SwipeToDismiss(
-                modifier = Modifier.animateItemPlacement(),
-                state = dismissState,
-                background = {},
-                directions = setOf(DismissDirection.EndToStart),
-                dismissContent = {
-                    PostCard(
-                        feedPost = feedPost,
-                        onCommentClickListener = {
-                            onCommentClickListener(feedPost)
-                        },
-                        onLikeClickListener = { statisticItem ->
-                            viewModel.updateCount(feedPost, statisticItem)
-                        },
-                        onShareClickListener = { statisticItem ->
-                            viewModel.updateCount(feedPost, statisticItem)
-                        },
-                        onViewsClickListener = { statisticItem ->
-                            viewModel.updateCount(feedPost, statisticItem)
-                        }
+                        SwipeToDismissBoxValue.StartToEnd,
+                        SwipeToDismissBoxValue.EndToStart,
                     )
-                })
+                    if (isDismissed) {
+                        viewModel.remove(feedPost)
+                    }
+                    return@rememberSwipeToDismissBoxState isDismissed
+                }
+            )
+
+            SwipeToDismissBox(
+                modifier = Modifier.animateItem(),
+                state = dismissState,
+                enableDismissFromEndToStart = true,
+                enableDismissFromStartToEnd = false,
+                backgroundContent = {},
+            ) {
+                PostCard(
+                    feedPost = feedPost,
+                    onLikeClickListener = { statisticItem ->
+                        viewModel.updateCount(feedPost, statisticItem)
+                    },
+                    onShareClickListener = { statisticItem ->
+                        viewModel.updateCount(feedPost, statisticItem)
+                    },
+                    onViewsClickListener = { statisticItem ->
+                        viewModel.updateCount(feedPost, statisticItem)
+                    },
+                    onCommentClickListener = { statisticItem ->
+                        onCommentClickListener(feedPost)
+                    }
+                )
+            }
         }
     }
 }
