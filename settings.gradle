@@ -1,8 +1,10 @@
 pluginManagement {
     repositories {
+        maven { setUrl( "https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-android/")}
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven { setUrl("https://artifactory-external.vkpartner.ru/artifactory/maven/") }
     }
 }
 dependencyResolutionManagement {
@@ -10,6 +12,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            setUrl("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-android/")
+        }
+        maven {
+            setUrl("https://artifactory-external.vkpartner.ru/artifactory/maven/")
+        }
     }
 }
 rootProject.name = "My Application"
