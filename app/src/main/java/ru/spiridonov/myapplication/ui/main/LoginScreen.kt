@@ -51,7 +51,7 @@ fun LoginScreen(
                     viewModel.setFail(fail)
                 },
                 authParams = VKIDAuthUiParams {
-                    scopes = setOf("wall", "email")
+                    scopes = setOf("wall", "email", "friends", "photos")
                 },
                 scenario = OneTapTitleScenario.SignUp,
                 signInAnotherAccountButtonEnabled = true,

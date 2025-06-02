@@ -3,25 +3,36 @@ package ru.spiridonov.myapplication.ui.views.news_feed
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.vk.id.VKID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import ru.spiridonov.myapplication.data.mapper.NewsFeedMapper
+import ru.spiridonov.myapplication.data.network.ApiFactory
 import ru.spiridonov.myapplication.domain.FeedPost
 import ru.spiridonov.myapplication.domain.StatisticItem
 
 class NewsFeedViewModel : ViewModel() {
 
-    private val sourceList = mutableListOf<FeedPost>().apply {
-        repeat(10) {
-            add(
-                FeedPost(
-                    id = it
-                )
-            )
-        }
-    }
 
-    private val initialState = NewsFeedScreenState.Posts(posts = sourceList)
+    private val initialState = NewsFeedScreenState.Initial
 
     private val _screenState = MutableLiveData<NewsFeedScreenState>(initialState)
     val screenState: LiveData<NewsFeedScreenState> = _screenState
+
+    private val mapper = NewsFeedMapper()
+
+    init {
+        loadRecommendation()
+    }
+
+    private fun loadRecommendation() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ApiFactory.apiService.loadRecommendations(token = VKID.Companion.instance.accessToken?.token.toString())
+            val feedPosts = mapper.mapNewsFeedResponseToPosts(response)
+            _screenState.value = NewsFeedScreenState.Posts(feedPosts)
+        }
+    }
 
     fun updateCount(feedPost: FeedPost, item: StatisticItem) {
         val currentState = screenState.value

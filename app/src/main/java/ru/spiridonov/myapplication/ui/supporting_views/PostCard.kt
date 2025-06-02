@@ -1,6 +1,5 @@
 package ru.spiridonov.myapplication.ui.supporting_views
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import ru.spiridonov.myapplication.R
 import ru.spiridonov.myapplication.domain.FeedPost
 import ru.spiridonov.myapplication.domain.StatisticItem
@@ -50,13 +51,11 @@ fun PostCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = feedPost.contentText)
             Spacer(modifier = Modifier.height(8.dp))
-            Image(
+            AsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(400.dp),
-                painter = painterResource(
-                    id = feedPost.contentImageResId
-                ),
+                    .wrapContentHeight(),
+                model = feedPost.contentImageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth
             )
@@ -78,11 +77,11 @@ private fun PostHeader(feedPost: FeedPost) {
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
+        AsyncImage(
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape),
-            painter = painterResource(id = feedPost.avatarResId),
+            model = feedPost.communityImageUrl,
             contentDescription = null
         )
 
