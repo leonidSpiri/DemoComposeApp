@@ -5,8 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import ru.spiridonov.myapplication.domain.FeedPost
-import ru.spiridonov.myapplication.domain.parcelable
+import ru.spiridonov.myapplication.domain.entity.FeedPost
+import ru.spiridonov.myapplication.domain.entity.parcelable
 
 fun NavGraphBuilder.homeScreenNavGraph(
     newsFeedScreenContent: @Composable () -> Unit,

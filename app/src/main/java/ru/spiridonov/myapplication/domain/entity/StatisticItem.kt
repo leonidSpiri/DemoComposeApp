@@ -1,4 +1,4 @@
-package ru.spiridonov.myapplication.domain
+package ru.spiridonov.myapplication.domain.entity
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

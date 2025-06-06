@@ -1,7 +1,7 @@
 package ru.spiridonov.myapplication.ui.views.comments
 
-import ru.spiridonov.myapplication.domain.FeedPost
-import ru.spiridonov.myapplication.domain.PostComment
+import ru.spiridonov.myapplication.domain.entity.FeedPost
+import ru.spiridonov.myapplication.domain.entity.PostComment
 
 sealed class CommentsScreenState {
     data object Initial : CommentsScreenState()

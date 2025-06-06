@@ -1,4 +1,4 @@
-package ru.spiridonov.myapplication.domain
+package ru.spiridonov.myapplication.domain.entity
 
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -17,7 +17,7 @@ data class FeedPost(
     val contentImageUrl: String?,
     val statisticsList: List<StatisticItem>,
     val communityId: Long,
-    val isFavourite: Boolean
+    val isLiked: Boolean
 ) : Parcelable {
     companion object {
 

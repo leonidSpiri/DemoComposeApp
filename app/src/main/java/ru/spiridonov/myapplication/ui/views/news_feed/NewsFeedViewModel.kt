@@ -8,8 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.spiridonov.myapplication.data.repository.NewsFeedRepositoryImpl
-import ru.spiridonov.myapplication.domain.FeedPost
-import ru.spiridonov.myapplication.domain.StatisticItem
+import ru.spiridonov.myapplication.domain.entity.FeedPost
 
 class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -22,6 +21,7 @@ class NewsFeedViewModel(application: Application) : AndroidViewModel(application
     private val newsFeedRepositoryImpl = NewsFeedRepositoryImpl(application)
 
     init {
+        _screenState.value = NewsFeedScreenState.Loading
         loadRecommendation()
     }
 
@@ -32,40 +32,31 @@ class NewsFeedViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateCount(feedPost: FeedPost, item: StatisticItem) {
-        val currentState = screenState.value
-        if (currentState !is NewsFeedScreenState.Posts) return
-        val oldPosts = currentState.posts.toMutableList()
-        val oldStatisticItem = feedPost.statisticsList
-        val newStatistics = oldStatisticItem.toMutableList().apply {
-            replaceAll { oldItem ->
-                if (oldItem.type == item.type)
-                    oldItem.copy(count = oldItem.count + 1)
-                else oldItem
-            }
-        }
-        val newFeedPost = feedPost.copy(statisticsList = newStatistics)
-        val newPosts = oldPosts.apply {
-            replaceAll {
-                if (it.id == feedPost.id) newFeedPost
-                else it
-            }
-        }
-        _screenState.value = NewsFeedScreenState.Posts(posts = newPosts)
+    fun loadNextRecommendations() {
+        _screenState.value =
+            NewsFeedScreenState.Posts(
+                newsFeedRepositoryImpl.feedPostList,
+                nextDataIsLoading = true
+            )
+       loadRecommendation()
     }
 
     fun changeLikeStatus(feedPost: FeedPost?) {
         if (feedPost == null) return
-        viewModelScope.launch {
-            newsFeedRepositoryImpl.addLike(feedPost)
+        viewModelScope.launch(Dispatchers.IO) {
+            if (feedPost.isLiked)
+                newsFeedRepositoryImpl.deleteLike(feedPost)
+            else
+                newsFeedRepositoryImpl.addLike(feedPost)
+            _screenState.value =
+                NewsFeedScreenState.Posts(newsFeedRepositoryImpl.feedPostList)
         }
     }
 
     fun remove(feedPost: FeedPost) {
-        val currentState = screenState.value
-        if (currentState !is NewsFeedScreenState.Posts) return
-        val oldPosts = currentState.posts.toMutableList()
-        oldPosts.remove(feedPost)
-        _screenState.value = NewsFeedScreenState.Posts(posts = oldPosts)
+        viewModelScope.launch(Dispatchers.IO) {
+            newsFeedRepositoryImpl.removePost(feedPost)
+        }
+        _screenState.value = NewsFeedScreenState.Posts(posts = newsFeedRepositoryImpl.feedPostList)
     }
 }

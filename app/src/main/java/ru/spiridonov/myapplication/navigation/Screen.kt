@@ -2,7 +2,7 @@ package ru.spiridonov.myapplication.navigation
 
 import android.net.Uri
 import com.google.gson.Gson
-import ru.spiridonov.myapplication.domain.FeedPost
+import ru.spiridonov.myapplication.domain.entity.FeedPost
 
 sealed class Screen(
     val route: String
