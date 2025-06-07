@@ -1,7 +1,13 @@
 package ru.spiridonov.myapplication.data.repository
 
-import android.app.Application
 import com.vk.id.VKID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import ru.spiridonov.myapplication.data.mapper.NewsFeedMapper
 import ru.spiridonov.myapplication.data.model.comments_dto.CommentsResponseDto
 import ru.spiridonov.myapplication.data.model.news_feed_model_dto.LikesCountResponse
@@ -10,29 +16,58 @@ import ru.spiridonov.myapplication.domain.entity.FeedPost
 import ru.spiridonov.myapplication.domain.entity.PostComment
 import ru.spiridonov.myapplication.domain.entity.StatisticItem
 import ru.spiridonov.myapplication.domain.entity.StatisticType
+import ru.spiridonov.myapplication.extensions.mergeWith
 
-class NewsFeedRepositoryImpl(application: Application) {
+class NewsFeedRepositoryImpl() {
     private val token = updateToken()
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+    private val nextDataNeededEvents = MutableSharedFlow<Unit>(replay = 1)
+    private val refreshedListFlow = MutableSharedFlow<List<FeedPost>>()
+
+    private val loadedListFlow = flow {
+        nextDataNeededEvents.emit(Unit)
+        nextDataNeededEvents.collect {
+            val startFrom = nextFrom
+
+            if (startFrom == null && feedPosts.isNotEmpty()) {
+                emit(feedPosts)
+                return@collect
+            }
+
+            val response = if (startFrom == null) {
+                apiService.loadRecommendations(token)
+            } else {
+                apiService.loadRecommendations(token, startFrom)
+            }
+            nextFrom = response.newsFeedContent.nextFrom
+            val posts = mapper.mapNewsFeedResponseToPosts(response)
+            _feedPosts.addAll(posts)
+            emit(feedPosts)
+        }
+    }
+
     private val apiService = ApiFactory.apiService
-    private val newsFeedMapper = NewsFeedMapper()
-    private var nextFrom: String? = null
+    private val mapper = NewsFeedMapper()
+
     private val _feedPosts = mutableListOf<FeedPost>()
-    val feedPostList: List<FeedPost>
+    private val feedPosts: List<FeedPost>
         get() = _feedPosts.toList()
 
+    private var nextFrom: String? = null
 
-    suspend fun loadRecommendation(): List<FeedPost> {
-        val startFrom = nextFrom
-        if (startFrom.isNullOrEmpty() && feedPostList.isNotEmpty()) return feedPostList
-        val response = if (startFrom.isNullOrEmpty())
-            apiService.loadRecommendations(token = token)
-        else
-            apiService.loadRecommendations(token = token, startFrom)
+    val recommendations: StateFlow<List<FeedPost>> = loadedListFlow
+        .mergeWith(refreshedListFlow)
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Lazily,
+            initialValue = feedPosts
+        )
 
-        _feedPosts.addAll(newsFeedMapper.mapNewsFeedResponseToPosts(response))
-        nextFrom = response.newsFeedContent.nextFrom
-        return feedPostList
+    suspend fun loadNextData() {
+        nextDataNeededEvents.emit(Unit)
     }
+
 
     suspend fun addLike(feedPost: FeedPost) {
         val ownerId = -feedPost.communityId
@@ -90,10 +125,10 @@ class NewsFeedRepositoryImpl(application: Application) {
         val feedPostItem = _feedPosts.find { it.id == feedPost.id }
         _feedPosts.remove(feedPostItem)
 
-       // refreshedListFlow.emit(NewsFeedResult.Success(feedPostList))
+        refreshedListFlow.emit(feedPosts)
     }
 
-    suspend fun loadCommentsToPost(feedPost: FeedPost):List<PostComment> {
+    suspend fun loadCommentsToPost(feedPost: FeedPost): List<PostComment> {
         val ownerId = -feedPost.communityId
         val response: CommentsResponseDto = apiService.getCommentsToPost(
             token = token,
@@ -101,10 +136,11 @@ class NewsFeedRepositoryImpl(application: Application) {
             postId = feedPost.id
         )
 
-        val comments = newsFeedMapper.mapCommentsResponseDtoToComments(response)
+        val comments = mapper.mapCommentsResponseDtoToComments(response)
         return comments
         //commentsToPost.emit(comments)
     }
+
 
     private fun updateToken() =
         VKID.Companion.instance.accessToken?.token

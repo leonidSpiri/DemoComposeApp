@@ -16,7 +16,7 @@ class CommentsViewModel(
 ) : AndroidViewModel(application) {
     private val _screenState = MutableLiveData<CommentsScreenState>(CommentsScreenState.Initial)
     val screenState: LiveData<CommentsScreenState> = _screenState
-    private val newsFeedRepositoryImpl = NewsFeedRepositoryImpl(application)
+    private val newsFeedRepositoryImpl = NewsFeedRepositoryImpl()
 
     init {
         loadComments(feedPost)

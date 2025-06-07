@@ -37,7 +37,7 @@ fun MainScreen() {
                 items.forEach { item ->
                     val selected = navBackStackEntry?.destination?.hierarchy?.any {
                         it.route == item.screen.route
-                    } ?: false
+                    } == true
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
